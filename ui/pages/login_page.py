@@ -41,6 +41,23 @@ class LoginPage(ctk.CTkFrame):
         self.error_label = ctk.CTkLabel(center_frame, text="", text_color="red")
         self.error_label.pack()
 
+        bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
+        bottom_frame.place(relx=0.5, rely=0.98, anchor="s")
+        
+        admin_label = ctk.CTkLabel(bottom_frame, text="Anda bukan admin?")
+        admin_label.pack(side="left")
+
+        login_button = ctk.CTkButton(
+            bottom_frame,
+            width=0,
+            text="kembali",
+            fg_color="transparent",
+            hover=False,
+            text_color="#1e90ff",
+            command=lambda: controller.show_page("home_page")
+        )
+        login_button.pack(side="left")
+
     def do_login(self, controller):
         user = self.username.get()
         pwd = self.password.get()

@@ -9,6 +9,9 @@ class HomePage(ctk.CTkFrame):
         center_frame = ctk.CTkFrame(self, fg_color="transparent")
         center_frame.place(relx=0.5, rely=0.5, anchor="center")
 
+        welcome_label = ctk.CTkLabel(center_frame, text="Selamat Datang!", font=("", 24, "bold"))
+        welcome_label.pack(side="top", pady=(0, 24))
+
         belanja_btn = ctk.CTkButton(
             center_frame,
             width=200,
@@ -17,7 +20,7 @@ class HomePage(ctk.CTkFrame):
         belanja_btn.pack()
 
         bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
-        bottom_frame.place(relx=0.5, rely=1.0, anchor="s")
+        bottom_frame.place(relx=0.5, rely=0.98, anchor="s")
 
         admin_label = ctk.CTkLabel(bottom_frame, text="Anda adalah admin?")
         admin_label.pack(side="left")
