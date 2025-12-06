@@ -1,5 +1,7 @@
 import customtkinter as ctk
 
+from services.auth_service import login
+
 
 class LoginPage(ctk.CTkFrame):
     def __init__(self, parent, controller):
@@ -34,7 +36,7 @@ class LoginPage(ctk.CTkFrame):
         login_btn = ctk.CTkButton(
             center_frame,
             text="Login",
-            command=lambda: self.do_login(controller),
+            command=lambda: self.handle_login(controller),
         )
         login_btn.pack(pady=5, fill="x")
 
@@ -43,7 +45,7 @@ class LoginPage(ctk.CTkFrame):
 
         bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
         bottom_frame.place(relx=0.5, rely=0.98, anchor="s")
-        
+
         admin_label = ctk.CTkLabel(bottom_frame, text="Anda bukan admin?")
         admin_label.pack(side="left")
 
@@ -58,17 +60,17 @@ class LoginPage(ctk.CTkFrame):
         )
         login_button.pack(side="left")
 
-    def do_login(self, controller):
-        user = self.username.get()
-        pwd = self.password.get()
+    def handle_login(self, controller):
+        username = self.username.get()
+        password = self.password.get()
 
-        if not user:
+        if not username:
             self.error_label.configure(text="Username tidak boleh kosong!")
             return
 
-        if not pwd:
+        if not password:
             self.error_label.configure(text="Password tidak boleh kosong!")
             return
 
-        print("Username:", user)
-        print("Password:", pwd)
+        result = login(username, password)
+        print(result)
