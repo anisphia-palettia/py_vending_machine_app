@@ -1,7 +1,10 @@
 import customtkinter as ctk
 
+from ui.pages.coin_page import CoinPage
 from ui.pages.home_page import HomePage
 from ui.pages.login_page import LoginPage
+from ui.pages.shop_page import ShopPage
+
 
 class App(ctk.CTk):
     def __init__(self):
@@ -16,6 +19,8 @@ class App(ctk.CTk):
         self.pages = {
             "home_page": HomePage(container, controller=self),
             "login_page": LoginPage(container, controller=self),
+            "shop_page": ShopPage(container, controller=self),
+            "coin_page" : CoinPage(container, controller=self),
         }
 
         self.show_page("home_page")
