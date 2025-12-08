@@ -1,4 +1,6 @@
+from services.product_service import prodcut_update_quantity
 import customtkinter as ctk
+
 
 class CoinPage(ctk.CTkFrame):
     def __init__(self, parent, controller):
@@ -17,21 +19,35 @@ class CoinPage(ctk.CTkFrame):
         self.main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Left Side: Payment Screen (Info)
-        self.screen_frame = ctk.CTkFrame(self.main_container, corner_radius=15, border_width=2, border_color="#333333")
+        self.screen_frame = ctk.CTkFrame(
+            self.main_container,
+            corner_radius=15,
+            border_width=2,
+            border_color="#333333",
+        )
         self.screen_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
 
         self.info_container = ctk.CTkFrame(self.screen_frame, fg_color="transparent")
         self.info_container.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.total_label = ctk.CTkLabel(self.info_container, text="Total: $0", font=("Arial", 32, "bold"))
+        self.total_label = ctk.CTkLabel(
+            self.info_container, text="Total: $0", font=("Arial", 32, "bold")
+        )
         self.total_label.pack(pady=10)
 
-        self.inserted_label = ctk.CTkLabel(self.info_container, text="Inserted: $0", font=("Arial", 24))
+        self.inserted_label = ctk.CTkLabel(
+            self.info_container, text="Inserted: $0", font=("Arial", 24)
+        )
         self.inserted_label.pack(pady=10)
 
-        self.change_label = ctk.CTkLabel(self.info_container, text="Change: $0", font=("Arial", 24), text_color="green")
+        self.change_label = ctk.CTkLabel(
+            self.info_container,
+            text="Change: $0",
+            font=("Arial", 24),
+            text_color="green",
+        )
         self.change_label.pack(pady=10)
-        
+
         # Right Side: Controls (Coins & Actions)
         self.controls_frame = ctk.CTkFrame(self.main_container, fg_color="transparent")
         self.controls_frame.pack(side="right", fill="both", expand=True, padx=(10, 0))
@@ -51,11 +67,11 @@ class CoinPage(ctk.CTkFrame):
                 height=60,
                 corner_radius=10,
                 font=("Arial", 16, "bold"),
-                command=lambda c=coin: self.insert_coin(c)
+                command=lambda c=coin: self.insert_coin(c),
             )
             btn.grid(row=row, column=col, padx=5, pady=5)
             col += 1
-            if col > 2: # 3 columns
+            if col > 2:  # 3 columns
                 col = 0
                 row += 1
 
@@ -69,7 +85,7 @@ class CoinPage(ctk.CTkFrame):
             corner_radius=10,
             font=("Arial", 20, "bold"),
             fg_color="green",
-            command=self.process_payment
+            command=self.process_payment,
         )
         self.pay_button.pack(pady=10)
 
@@ -80,8 +96,8 @@ class CoinPage(ctk.CTkFrame):
             height=40,
             fg_color="transparent",
             border_width=1,
-            text_color=("gray10", "gray90"), # Adaptive color
-            command=lambda: controller.show_page("shop_page")
+            text_color=("gray10", "gray90"),  # Adaptive color
+            command=lambda: controller.show_page("shop_page"),
         )
         self.back_button.pack(pady=5)
 
@@ -99,7 +115,7 @@ class CoinPage(ctk.CTkFrame):
     def update_ui(self):
         self.total_label.configure(text=f"Total: ${self.total_amount}")
         self.inserted_label.configure(text=f"Inserted: ${self.inserted_amount}")
-        
+
         change = self.inserted_amount - self.total_amount
         if change >= 0:
             self.change_label.configure(text=f"Change: ${change}")
@@ -111,18 +127,43 @@ class CoinPage(ctk.CTkFrame):
     def process_payment(self):
         print("\n--- PROCESSING PAYMENT ---")
         updates = []
+
+        # Buat payload updates
         for item in self.cart_items:
-            # Create update payload: id and negative quantity (sold)
-            updates.append({
-                "id": item["id"],
-                "quantity_change": -item["quantity"]
-            })
-        
+            updates.append(
+                {
+                    "id": item["id"],
+                    "quantity": -item["quantity"],  # kurangi stok
+                }
+            )
+
         print(f"Updates Payload: {updates}")
+
+        # -------------------------------
+        #       KIRIM UPDATE KE API
+        # -------------------------------
+        for update in updates:
+            try:
+                print(f"Updating product {update['id']} ...")
+                result = prodcut_update_quantity(update["id"], update["quantity"])
+                print(f"API Response: {result}")
+            except Exception as e:
+                print(f"Failed to update product {update['id']}: {e}")
+
         print("Payment Successful!")
-        print(f"Total: ${self.total_amount}, Inserted: ${self.inserted_amount}, Change: ${self.inserted_amount - self.total_amount}")
+        print(
+            f"Total: ${self.total_amount}, Inserted: ${self.inserted_amount}, Change: ${self.inserted_amount - self.total_amount}"
+        )
         print("--------------------------\n")
 
-        # Reset and go back to home or shop
-        # User requested "kembali dengan melakukan update" - returning to home feels safest for a completed transaction
+        # Reset setelah payment
+        self.cart_items = []
+        self.total_amount = 0
+        self.inserted_amount = 0
+
+        # Clear ShopPage Cart
+        shop_page = self.controller.pages["shop_page"]
+        if hasattr(shop_page, "clear_cart"):
+            shop_page.clear_cart()
+
         self.controller.show_page("home_page")

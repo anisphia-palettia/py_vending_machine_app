@@ -20,7 +20,7 @@ class App(ctk.CTk):
             "home_page": HomePage(container, controller=self),
             "login_page": LoginPage(container, controller=self),
             "shop_page": ShopPage(container, controller=self),
-            "coin_page" : CoinPage(container, controller=self),
+            "coin_page": CoinPage(container, controller=self),
         }
 
         self.show_page("home_page")
@@ -29,3 +29,6 @@ class App(ctk.CTk):
         for page in self.pages.values():
             page.pack_forget()
         self.pages[name].pack(fill="both", expand=True)
+
+        if hasattr(self.pages[name], "refresh"):
+            self.pages[name].refresh()

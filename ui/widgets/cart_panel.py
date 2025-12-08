@@ -25,11 +25,7 @@ class CartPanel(ctk.CTkFrame):
         self.total_label.grid(row=0, column=0, sticky="e", pady=(0, 10))
 
         self.buy_button = ctk.CTkButton(
-            footer,
-            text="Checkout",
-            width=180,
-            height=40,
-            command=self.handle_buy
+            footer, text="Checkout", width=180, height=40, command=self.handle_buy
         )
         self.buy_button.grid(row=1, column=0, sticky="e")
 
@@ -41,40 +37,49 @@ class CartPanel(ctk.CTkFrame):
         cart_list = []
 
         for slug, item in self.cart_items.items():
-            cart_list.append({
-                "id": item["id"],
-                "slug": slug,
-                "quantity": item["qty"],
-                "price": item["price"],
-                "subtotal": item["qty"] * item["price"],
-            })
+            cart_list.append(
+                {
+                    "id": item["id"],
+                    "slug": slug,
+                    "quantity": item["qty"],
+                    "price": item["price"],
+                    "subtotal": item["qty"] * item["price"],
+                }
+            )
 
         total = sum(i["subtotal"] for i in cart_list)
 
-        return {
-            "items": cart_list,
-            "total": total
-        }
+        return {"items": cart_list, "total": total}
 
     def add_item(self, product_id, slug, name, price):
         if slug in self.cart_items:
             self.cart_items[slug]["qty"] += 1
-            self.cart_items[slug]["qty_lbl"].configure(text=self.cart_items[slug]["qty"])
+            self.cart_items[slug]["qty_lbl"].configure(
+                text=self.cart_items[slug]["qty"]
+            )
         else:
             row = len(self.cart_items)
 
             name_lbl = ctk.CTkLabel(self.items_frame, text=name)
             name_lbl.grid(row=row, column=0, sticky="w")
 
-            minus_btn = ctk.CTkButton(self.items_frame, text="-", width=25,
-                                      command=lambda: self.change_qty(slug, price, -1))
+            minus_btn = ctk.CTkButton(
+                self.items_frame,
+                text="-",
+                width=25,
+                command=lambda: self.change_qty(slug, price, -1),
+            )
             minus_btn.grid(row=row, column=1, padx=5)
 
             qty_lbl = ctk.CTkLabel(self.items_frame, text="1")
             qty_lbl.grid(row=row, column=2, padx=5)
 
-            plus_btn = ctk.CTkButton(self.items_frame, text="+", width=25,
-                                     command=lambda: self.change_qty(slug, price, +1))
+            plus_btn = ctk.CTkButton(
+                self.items_frame,
+                text="+",
+                width=25,
+                command=lambda: self.change_qty(slug, price, +1),
+            )
             plus_btn.grid(row=row, column=3, padx=5)
 
             self.cart_items[slug] = {
@@ -119,3 +124,7 @@ class CartPanel(ctk.CTkFrame):
     def update_total(self):
         total = sum(item["qty"] * item["price"] for item in self.cart_items.values())
         self.total_label.configure(text=f"Total        ${total}")
+
+    def clear_cart(self):
+        for slug in list(self.cart_items.keys()):
+            self.remove_item(slug)

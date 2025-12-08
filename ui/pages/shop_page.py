@@ -14,17 +14,19 @@ class ShopPage(ctk.CTkFrame):
 
         self.grid_columnconfigure(0, weight=3)
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(1, weight=1) # Row 1 is now the main content
+        self.grid_rowconfigure(1, weight=1)  # Row 1 is now the main content
 
         # Header Frame
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=(10, 0))
+        header_frame.grid(
+            row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=(10, 0)
+        )
 
         back_btn = ctk.CTkButton(
             header_frame,
             text="< Kembali",
             width=100,
-            command=lambda: controller.show_page("home_page")
+            command=lambda: controller.show_page("home_page"),
         )
         back_btn.pack(side="left")
 
@@ -35,6 +37,11 @@ class ShopPage(ctk.CTkFrame):
         self.cart_panel = CartPanel(self, on_buy=self.go_to_coin_page)
         self.cart_panel.grid(row=1, column=1, sticky="nsew", padx=(0, 10), pady=10)
 
+        self.build_products()
+
+    def refresh(self):
+        for widget in self.products_frame.winfo_children():
+            widget.destroy()
         self.build_products()
 
     def build_products(self):
@@ -68,7 +75,7 @@ class ShopPage(ctk.CTkFrame):
                 image_url=image_url,
                 on_click=self.add_to_cart,
                 width=150,
-                height=160
+                height=160,
             )
 
             r, c = divmod(index, cols)
@@ -78,13 +85,13 @@ class ShopPage(ctk.CTkFrame):
     def add_to_cart(self, card):
         self.cart_panel.add_item(card.product_id, card.slug, card.name, card.price)
 
-    def go_to_coin_page(self, cart_data):
-        total = cart_data["total"]
+    def clear_cart(self):
+        self.cart_panel.clear_cart()
 
+    def go_to_coin_page(self, cart_data):
         print(cart_data)
 
         coin_page = self.controller.pages["coin_page"]
         coin_page.set_total(cart_data)
 
         self.controller.show_page("coin_page")
-
