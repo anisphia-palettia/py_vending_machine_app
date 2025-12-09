@@ -3,6 +3,9 @@ import customtkinter as ctk
 from ui.pages.coin_page import CoinPage
 from ui.pages.login_page import LoginPage
 from ui.pages.shop_page import ShopPage
+from ui.pages.admin_page import AdminPage
+from ui.pages.create_product_page import CreateProductPage
+from ui.pages.update_product_page import UpdateProductPage
 
 
 class App(ctk.CTk):
@@ -19,6 +22,9 @@ class App(ctk.CTk):
             "login_page": LoginPage(container, controller=self),
             "shop_page": ShopPage(container, controller=self),
             "coin_page": CoinPage(container, controller=self),
+            "admin_page": AdminPage(container, controller=self),
+            "create_product_page": CreateProductPage(container, controller=self),
+            "update_product_page": UpdateProductPage(container, controller=self),
         }
 
         self.show_page("shop_page")

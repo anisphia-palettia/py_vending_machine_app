@@ -16,3 +16,11 @@ def put(path, data):
 
 def delete(path):
     return requests.delete(API_URL + path).json()
+
+
+def post_file(path, files):
+    return requests.post(API_URL + path, files=files).json()
+
+
+def post_multipart(path, data, files=None):
+    return requests.post(API_URL + path, data=data, files=files).json()
