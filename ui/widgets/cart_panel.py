@@ -2,36 +2,92 @@ import customtkinter as ctk
 
 
 class CartPanel(ctk.CTkFrame):
-    def __init__(self, parent, on_buy=None, **kwargs):
-        super().__init__(parent, corner_radius=0, **kwargs)
+    def __init__(self, parent, on_buy=None, on_login=None, **kwargs):
+        # Use default styling, no fixed header fg_color="#1E1E1E"
+        super().__init__(parent, corner_radius=0, width=300, **kwargs) 
 
         self.cart_items = {}
         self.on_buy = on_buy
+        self.on_login = on_login
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        self.grid_propagate(False) # Force fixed width if needed
 
-        title = ctk.CTkLabel(self, text="Keranjang Belanja", font=("Arial", 20, "bold"))
-        title.grid(row=0, column=0, sticky="w", padx=20, pady=(20, 10))
+        # --- Header ---
+        header = ctk.CTkFrame(self, fg_color="transparent", height=60, corner_radius=0)
+        header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
+        header.grid_columnconfigure(0, weight=1)
+        
+        title = ctk.CTkLabel(
+            header, 
+            text="Your Cart", 
+            font=("Roboto", 22, "bold"), 
+            # text_color="#FFFFFF", # Use default text color
+            anchor="w"
+        )
+        title.grid(row=0, column=0, sticky="w")
+        
+        subtitle = ctk.CTkLabel(
+            header,
+            text="Ready to checkout?",
+            font=("Roboto", 12),
+            text_color=("gray60", "gray70"),
+            anchor="w"
+        )
+        subtitle.grid(row=1, column=0, sticky="w")
 
+        # --- List Area ---
         self.items_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.items_frame.grid(row=1, column=0, sticky="nsew", padx=10)
 
-        footer = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        footer.grid(row=2, column=0, sticky="ew", padx=20, pady=20)
+        # --- Footer ---
+        footer = ctk.CTkFrame(self, corner_radius=15) # Default surface color
+        footer.grid(row=2, column=0, sticky="ew", padx=15, pady=20)
         footer.grid_columnconfigure(0, weight=1)
 
-        self.total_label = ctk.CTkLabel(footer, text="Total: $0", font=("Arial", 14))
-        self.total_label.grid(row=0, column=0, sticky="e", pady=(0, 10))
+        self.total_label = ctk.CTkLabel(
+            footer, 
+            text="Total: $0.00", 
+            font=("Roboto", 18, "bold"),
+            # text_color="#FFFFFF"
+        )
+        self.total_label.grid(row=0, column=0, sticky="ew", pady=(15, 5))
 
         self.buy_button = ctk.CTkButton(
-            footer, text="Checkout", width=180, height=40, command=self.handle_buy
+            footer, 
+            text="Checkout Now", 
+            width=200, 
+            height=45, 
+            corner_radius=25,
+            font=("Roboto", 14, "bold"),
+            # fg_color="#2196F3", # Use default theme color
+            # hover_color="#1976D2",
+            command=self.handle_buy
         )
-        self.buy_button.grid(row=1, column=0, sticky="e")
+        self.buy_button.grid(row=1, column=0, sticky="ew", padx=20, pady=(10, 5))
+
+        # Admin Login Button (Text Style)
+        self.login_btn = ctk.CTkButton(
+            footer,
+            text="Admin Login",
+            width=100,
+            height=20,
+            font=("Roboto", 11),
+            fg_color="transparent",
+            text_color=("gray50", "gray50"),
+            hover_color=("gray85", "gray25"),
+            command=self.handle_login
+        )
+        self.login_btn.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 15))
 
     def handle_buy(self):
         if self.on_buy:
             self.on_buy(self.get_cart_data())
+            
+    def handle_login(self):
+        if self.on_login:
+            self.on_login()
 
     def get_cart_data(self):
         cart_list = []
@@ -55,41 +111,64 @@ class CartPanel(ctk.CTkFrame):
         if slug in self.cart_items:
             self.cart_items[slug]["qty"] += 1
             self.cart_items[slug]["qty_lbl"].configure(
-                text=self.cart_items[slug]["qty"]
+                text=str(self.cart_items[slug]["qty"])
             )
         else:
-            row = len(self.cart_items)
+            # Container for Item
+            item_frame = ctk.CTkFrame(self.items_frame, corner_radius=10)
+            item_frame.pack(fill="x", pady=5, padx=5) # Use pack for automatic stacking
+            item_frame.grid_columnconfigure(0, weight=1)
 
-            name_lbl = ctk.CTkLabel(self.items_frame, text=name)
-            name_lbl.grid(row=row, column=0, sticky="w")
+            # Name and Price
+            name_lbl = ctk.CTkLabel(item_frame, text=name, font=("Roboto", 13, "bold"), anchor="w")
+            name_lbl.grid(row=0, column=0, sticky="ew", padx=10, pady=(5,0))
+            
+            price_sub_lbl = ctk.CTkLabel(item_frame, text=f"${price}", font=("Roboto", 11), text_color=("gray60", "gray70"), anchor="w")
+            price_sub_lbl.grid(row=1, column=0, sticky="ew", padx=10, pady=(0,5))
+
+            # Controls
+            ctrl_frame = ctk.CTkFrame(item_frame, fg_color="transparent")
+            ctrl_frame.grid(row=0, column=1, rowspan=2, padx=5, sticky="e")
 
             minus_btn = ctk.CTkButton(
-                self.items_frame,
+                ctrl_frame,
                 text="-",
-                width=25,
+                width=30,
+                height=30,
+                corner_radius=15,
+                fg_color="transparent",
+                border_width=1,
+                border_color=("gray70", "gray30"),
+                text_color=("gray10", "gray90"),
+                font=("Arial", 14, "bold"),
                 command=lambda: self.change_qty(slug, price, -1),
             )
-            minus_btn.grid(row=row, column=1, padx=5)
+            minus_btn.pack(side="left", padx=2)
 
-            qty_lbl = ctk.CTkLabel(self.items_frame, text="1")
-            qty_lbl.grid(row=row, column=2, padx=5)
+            qty_lbl = ctk.CTkLabel(ctrl_frame, text="1", font=("Roboto", 14), width=30)
+            qty_lbl.pack(side="left", padx=2)
 
             plus_btn = ctk.CTkButton(
-                self.items_frame,
+                ctrl_frame,
                 text="+",
-                width=25,
+                width=30,
+                height=30,
+                corner_radius=15,
+                fg_color="transparent",
+                border_width=1,
+                border_color=("gray70", "gray30"),
+                text_color=("gray10", "gray90"),
+                font=("Arial", 14, "bold"),
                 command=lambda: self.change_qty(slug, price, +1),
             )
-            plus_btn.grid(row=row, column=3, padx=5)
+            plus_btn.pack(side="left", padx=2)
 
             self.cart_items[slug] = {
                 "id": product_id,
                 "qty": 1,
                 "price": price,
-                "name_lbl": name_lbl,
+                "frame": item_frame, # Store frame to destroy later
                 "qty_lbl": qty_lbl,
-                "minus": minus_btn,
-                "plus": plus_btn,
             }
 
         self.update_total()
@@ -102,29 +181,20 @@ class CartPanel(ctk.CTkFrame):
             self.remove_item(slug)
             return
 
-        item["qty_lbl"].configure(text=item["qty"])
+        item["qty_lbl"].configure(text=str(item["qty"]))
         self.update_total()
 
     def remove_item(self, slug):
-        for w in self.cart_items[slug].values():
-            if hasattr(w, "destroy"):
-                w.destroy()
-
-        del self.cart_items[slug]
-        self.repack_rows()
+        if slug in self.cart_items:
+            self.cart_items[slug]["frame"].destroy()
+            del self.cart_items[slug]
         self.update_total()
-
-    def repack_rows(self):
-        for i, (slug, item) in enumerate(self.cart_items.items()):
-            item["name_lbl"].grid(row=i, column=0, sticky="w")
-            item["minus"].grid(row=i, column=1, padx=5)
-            item["qty_lbl"].grid(row=i, column=2, padx=5)
-            item["plus"].grid(row=i, column=3, padx=5)
 
     def update_total(self):
         total = sum(item["qty"] * item["price"] for item in self.cart_items.values())
-        self.total_label.configure(text=f"Total        ${total}")
+        self.total_label.configure(text=f"Total: ${total:.2f}")
 
     def clear_cart(self):
         for slug in list(self.cart_items.keys()):
             self.remove_item(slug)
+
