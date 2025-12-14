@@ -1,5 +1,6 @@
 import customtkinter as ctk
-from services.product_service import products_find_all
+from services.product_service import products_find_all, product_delete
+from tkinter import messagebox
 
 
 class AdminPage(ctk.CTkFrame):
@@ -104,6 +105,8 @@ class AdminPage(ctk.CTkFrame):
         row_frame = ctk.CTkFrame(self.product_list_frame, corner_radius=10)
         row_frame.pack(fill="x", pady=5)
         row_frame.grid_columnconfigure(0, weight=1)
+        row_frame.grid_columnconfigure(1, weight=0) # Edit button
+        row_frame.grid_columnconfigure(2, weight=0) # Delete button
 
         # Info
         info_text = f"{name}\n${price} - Stock: {stock}"
@@ -122,7 +125,20 @@ class AdminPage(ctk.CTkFrame):
             text_color=("gray10", "gray90"),
             command=lambda p=product: self._go_to_update(p),
         )
-        btn_edit.grid(row=0, column=1, padx=15, pady=10, sticky="e")
+        btn_edit.grid(row=0, column=1, padx=(5, 5), pady=10, sticky="e")
+
+        # Delete Button
+        btn_delete = ctk.CTkButton(
+            row_frame,
+            text="Delete",
+            width=80,
+            height=30,
+            fg_color="#D32F2F",
+            hover_color="#B71C1C",
+            text_color="white",
+            command=lambda p=product: self._confirm_delete(p),
+        )
+        btn_delete.grid(row=0, column=2, padx=(5, 15), pady=10, sticky="e")
 
     def _go_to_create(self):
         self.controller.show_page("create_product_page")
@@ -131,6 +147,18 @@ class AdminPage(ctk.CTkFrame):
         update_page = self.controller.pages["update_product_page"]
         update_page.set_product(product)
         self.controller.show_page("update_product_page")
+
+    def _confirm_delete(self, product):
+        if messagebox.askyesno(
+            "Confirm Delete", f"Are you sure you want to delete '{product.get('name')}'?"
+        ):
+            res = product_delete(product.get("id"))
+            if res.get("success"):
+                self.refresh()
+            else:
+                messagebox.showerror(
+                    "Error", f"Failed to delete product: {res.get('message')}"
+                )
 
     def _logout(self):
         self.controller.show_page("login_page")

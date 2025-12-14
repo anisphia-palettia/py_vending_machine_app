@@ -24,3 +24,7 @@ def post_file(path, files):
 
 def post_multipart(path, data, files=None):
     return requests.post(API_URL + path, data=data, files=files).json()
+
+
+def put_multipart(path, data, files=None):
+    return requests.put(API_URL + path, data=data, files=files).json()

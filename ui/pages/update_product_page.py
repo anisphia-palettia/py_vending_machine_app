@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import filedialog
 import os
-from services.product_service import product_update, upload_image
+from services.product_service import product_update
 
 
 class UpdateProductPage(ctk.CTkFrame):
@@ -27,10 +27,7 @@ class UpdateProductPage(ctk.CTkFrame):
         )
         self.name_entry.pack(pady=10, padx=20)
 
-        self.slug_entry = ctk.CTkEntry(
-            self.center_frame, placeholder_text="Slug", width=300
-        )
-        self.slug_entry.pack(pady=10, padx=20)
+
 
         self.price_entry = ctk.CTkEntry(
             self.center_frame, placeholder_text="Price (Number)", width=300
@@ -86,8 +83,7 @@ class UpdateProductPage(ctk.CTkFrame):
         self.name_entry.delete(0, "end")
         self.name_entry.insert(0, product_data.get("name", ""))
 
-        self.slug_entry.delete(0, "end")
-        self.slug_entry.insert(0, product_data.get("slug", ""))
+
 
         self.price_entry.delete(0, "end")
         self.price_entry.insert(0, str(product_data.get("price", 0)))
@@ -123,11 +119,11 @@ class UpdateProductPage(ctk.CTkFrame):
             return
 
         name = self.name_entry.get()
-        slug = self.slug_entry.get()
+        name = self.name_entry.get()
         price = self.price_entry.get()
         qty = self.qty_entry.get()
 
-        if not name or not slug or not price or not qty:
+        if not name or not price or not qty:
             self.msg_label.configure(
                 text="Please fill all required fields", text_color="red"
             )
@@ -142,38 +138,8 @@ class UpdateProductPage(ctk.CTkFrame):
             )
             return
 
-        # Handle Image Upload
-        image_filename = self.original_image_filename
-        if self.selected_image_path:
-            self.msg_label.configure(text="Uploading new image...", text_color="blue")
-            self.update_idletasks()
-            try:
-                res = upload_image(self.selected_image_path)
-                if res.get("success"):
-                    image_filename = (
-                        res.get("data", {}).get("filename") or res.get("filename") or ""
-                    )
-                else:
-                    self.msg_label.configure(
-                        text=f"Image upload failed: {res.get('message')}",
-                        text_color="red",
-                    )
-                    return
-            except Exception as e:
-                self.msg_label.configure(
-                    text=f"Upload Error: {str(e)}", text_color="red"
-                )
-                return
-
-        data = {
-            "name": name,
-            "slug": slug,
-            "price": price,
-            "quantity": qty,
-            "image": image_filename,
-        }
-
-        res = product_update(self.product_id, data)
+        # Call product_update
+        res = product_update(self.product_id, name, price, qty, self.selected_image_path)
         if res.get("success"):
             self.msg_label.configure(text="Product Updated!", text_color="green")
             self.controller.show_page("admin_page")

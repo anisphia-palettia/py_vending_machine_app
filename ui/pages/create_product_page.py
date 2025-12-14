@@ -1,4 +1,4 @@
-from services.product_service import upload_image
+
 import customtkinter as ctk
 from tkinter import filedialog
 import os
@@ -116,38 +116,8 @@ class CreateProductPage(ctk.CTkFrame):
             return
 
         # Handle Image Upload
-        image_filename = ""
-        if self.selected_image_path:
-            self.msg_label.configure(text="Uploading image...", text_color="blue")
-            self.update_idletasks()
-            try:
-                res = upload_image(self.selected_image_path)
-                if res.get("success"):
-                    # Assuming API returns data: { filename: "..." } or similar
-                    # If undefined, we might check keys
-                    image_filename = (
-                        res.get("data", {}).get("filename") or res.get("filename") or ""
-                    )
-                else:
-                    self.msg_label.configure(
-                        text=f"Image upload failed: {res.get('message')}",
-                        text_color="red",
-                    )
-                    return
-            except Exception as e:
-                self.msg_label.configure(
-                    text=f"Upload Error: {str(e)}", text_color="red"
-                )
-                return
-
-        data = {
-            "name": name,
-            "price": price,
-            "quantity": qty,
-            "image": image_filename,
-        }
-
-        res = product_create(data)
+        # Call product_create with image path if selected
+        res = product_create(name, price, qty, self.selected_image_path)
         if res.get("success"):
             self.msg_label.configure(text="Product Created!", text_color="green")
             self.clear_fields()
