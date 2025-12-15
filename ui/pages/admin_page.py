@@ -105,8 +105,8 @@ class AdminPage(ctk.CTkFrame):
         row_frame = ctk.CTkFrame(self.product_list_frame, corner_radius=10)
         row_frame.pack(fill="x", pady=5)
         row_frame.grid_columnconfigure(0, weight=1)
-        row_frame.grid_columnconfigure(1, weight=0) # Edit button
-        row_frame.grid_columnconfigure(2, weight=0) # Delete button
+        row_frame.grid_columnconfigure(1, weight=0)  # Edit button
+        row_frame.grid_columnconfigure(2, weight=0)  # Delete button
 
         # Info
         info_text = f"{name}\n${price} - Stock: {stock}"
@@ -150,7 +150,8 @@ class AdminPage(ctk.CTkFrame):
 
     def _confirm_delete(self, product):
         if messagebox.askyesno(
-            "Confirm Delete", f"Are you sure you want to delete '{product.get('name')}'?"
+            "Confirm Delete",
+            f"Are you sure you want to delete '{product.get('name')}'?",
         ):
             res = product_delete(product.get("id"))
             if res.get("success"):
